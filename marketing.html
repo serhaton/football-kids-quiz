@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Futbol Kids Quiz - Offline Football Quiz for Kids</title>
-  <meta name="description" content="Futbol Kids Quiz is an offline football guessing game for kids and families. Guess famous players from real photos in English or Turkish." />
+  <meta name="description" content="Futbol Kids Quiz is an offline football guessing game for kids and families." />
   <style>
     :root {
       --bg: #eef5ff;
@@ -13,13 +13,13 @@
       --muted: #5f7391;
       --blue: #0b5cff;
       --blue-dark: #0645bf;
-      --green: #22b573;
       --shadow: 0 16px 40px rgba(16, 33, 61, 0.12);
       --radius: 20px;
     }
 
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
+
     body {
       font-family: "Avenir Next", "Nunito", "Segoe UI", Arial, sans-serif;
       color: var(--ink);
@@ -125,11 +125,6 @@
       font-size: 16px;
     }
 
-    .highlight {
-      color: var(--green);
-      font-weight: 800;
-    }
-
     .screens {
       margin-top: 18px;
       background: var(--card);
@@ -147,17 +142,20 @@
 
     .shot {
       border-radius: 14px;
-      background: linear-gradient(180deg, #dcecff, #f3f8ff);
-      border: 1px dashed #b7cae5;
+      border: 1px solid #d8e5f8;
       aspect-ratio: 9 / 19.5;
+      overflow: hidden;
+      background: #f5f9ff;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #5d7597;
-      font-weight: 700;
-      font-size: 14px;
-      text-align: center;
-      padding: 8px;
+    }
+
+    .shot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .footer {
@@ -169,12 +167,7 @@
 
     @media (max-width: 760px) {
       .grid { grid-template-columns: 1fr; }
-      .shots { grid-template-columns: 1fr 1fr; }
-    }
-
-    @media (max-width: 480px) {
       .shots { grid-template-columns: 1fr; }
-      .hero { padding: 22px; }
     }
   </style>
 </head>
@@ -187,7 +180,6 @@
         A fun football guessing game for kids and families. Guess famous players from real photos,
         switch between English and Turkish, and play anywhere, even without internet.
       </p>
-      <!-- Replace href with your real App Store URL -->
       <a class="cta" href="https://apps.apple.com/app/id0000000000" target="_blank" rel="noopener noreferrer">
         Download on the App Store
       </a>
@@ -207,7 +199,7 @@
       <article class="card">
         <h2>Key Features</h2>
         <ul>
-          <li><span class="highlight">Fully offline</span> gameplay</li>
+          <li>Fully offline gameplay</li>
           <li>25 football players with real photos</li>
           <li>English + Turkish language support</li>
           <li>Audio pronunciation button for names</li>
@@ -218,17 +210,21 @@
 
     <section class="screens">
       <h2 style="margin:0;">Screenshots</h2>
-      <p style="margin:6px 0 0;color:#5f7391;">Replace these placeholders with real app screenshots.</p>
+      <p style="margin:6px 0 0;color:#5f7391;">Gameplay, result and language settings screens.</p>
       <div class="shots">
-        <div class="shot">Home / Question Screen</div>
-        <div class="shot">Language Settings Screen</div>
-        <div class="shot">Result Screen</div>
+        <figure class="shot" style="margin:0;">
+          <img src="./play.png" alt="Gameplay screen" />
+        </figure>
+        <figure class="shot" style="margin:0;">
+          <img src="./result.png" alt="Result screen" />
+        </figure>
+        <figure class="shot" style="margin:0;">
+          <img src="./language.png" alt="Language settings screen" />
+        </figure>
       </div>
     </section>
 
-    <p class="footer">
-      © 2026 Serhat Onal. All rights reserved.
-    </p>
+    <p class="footer">© 2026 Serhat Onal. All rights reserved.</p>
   </main>
 </body>
 </html>
