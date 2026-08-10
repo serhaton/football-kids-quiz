@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Futbol Kids Quiz - Support</title>
+  <meta name="description" content="Support page for Futbol Kids Quiz." />
+  <style>
+    :root {
+      --bg: #eef5ff;
+      --card: #ffffff;
+      --ink: #10213d;
+      --muted: #5f7391;
+      --blue: #0b5cff;
+      --shadow: 0 14px 36px rgba(16, 33, 61, 0.12);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "Avenir Next", "Nunito", "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, #dff0ff 0, transparent 30%),
+        radial-gradient(circle at 90% 15%, #e9ffe9 0, transparent 30%),
+        var(--bg);
+      line-height: 1.55;
+    }
+
+    .wrap {
+      width: min(900px, 100%);
+      margin: 0 auto;
+      padding: 24px 16px 50px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #0b5cff 0%, #3f8bff 100%);
+      color: #fff;
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5.5vw, 42px);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: #eaf2ff;
+      font-size: clamp(15px, 2.8vw, 19px);
+      max-width: 700px;
+    }
+
+    .grid {
+      margin-top: 16px;
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 21px;
+      letter-spacing: -0.01em;
+    }
+
+    .muted { color: var(--muted); }
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    a:hover { text-decoration: underline; }
+
+    ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .footer {
+      margin-top: 14px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>Futbol Kids Quiz Support</h1>
+      <p class="subtitle">
+        Need help? We are happy to assist you.
+      </p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Contact</h2>
+        <p class="muted">
+          Email: <a href="mailto:support@yourdomain.com">support@yourdomain.com</a><br />
+          Typical response time: 24-48 hours
+        </p>
+      </article>
+
+      <article class="card">
+        <h2>App Info</h2>
+        <p class="muted">
+          App Name: Futbol Kids Quiz<br />
+          Platform: iOS<br />
+          Current Version: 1.0.0
+        </p>
+      </article>
+    </section>
+
+    <section class="card" style="margin-top:14px;">
+      <h2>Frequently Asked Questions</h2>
+      <ul>
+        <li><strong>How can I change language?</strong> Open Settings in the app and choose English, Turkish, or Phone Language.</li>
+        <li><strong>Does the app work offline?</strong> Yes, gameplay works fully offline.</li>
+        <li><strong>Why is sound not playing?</strong> Please check your mute switch and volume level on the device.</li>
+        <li><strong>How many questions are in one game?</strong> Each game has 10 questions.</li>
+      </ul>
+    </section>
+
+    <section class="card" style="margin-top:14px;">
+      <h2>When Reporting an Issue</h2>
+      <p class="muted">Please include the following details in your email:</p>
+      <ul>
+        <li>Device model (example: iPhone 15)</li>
+        <li>iOS version</li>
+        <li>App version</li>
+        <li>Short description of the issue</li>
+        <li>Screenshot or screen recording (if possible)</li>
+      </ul>
+    </section>
+
+    <section class="card" style="margin-top:14px;">
+      <h2>Legal</h2>
+      <p class="muted">
+        Privacy Policy: <a href="https://yourdomain.com/privacy" target="_blank" rel="noopener noreferrer">https://yourdomain.com/privacy</a><br />
+        Marketing Page: <a href="https://yourdomain.com/futbol-kids-quiz" target="_blank" rel="noopener noreferrer">https://yourdomain.com/futbol-kids-quiz</a>
+      </p>
+    </section>
+
+    <p class="footer">
+      Last updated: August 2026<br />
+      © 2026 Serhat Onal. All rights reserved.
+    </p>
+  </main>
+</body>
+</html>
