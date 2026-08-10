@@ -2179,7 +2179,7 @@ SPEC CHECKSUMS:
   ExpoKeepAwake: c26f14275017370cc8a4b7b43a0e23361f2053a5
   ExpoLocalization: 659243b03b3a3e9589793cee2f728a899e181329
   ExpoLogBox: 6bb73c341aca22e699bd4da6cc61afc844e1a648
-  ExpoModulesCore: 47d7d48e9bde4515dd6247bb7ad3b61b30cd5a66
+  ExpoModulesCore: abbb7dbd789d975fbcfb43d0f39ec69efa3c003a
   ExpoModulesJSI: b20fefa4cdd9097e7e6b715466d1900b8c5d4711
   ExpoModulesWorklets: 53d4ca8d32225cb3ec4660b9f03496192b4f3cac
   ExpoSpeech: 0e90904e2af5d6f166d4d2ffbdab535686597938
