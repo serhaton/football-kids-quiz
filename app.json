@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Futbol Kids Quiz",
+    "slug": "football-kids-quiz",
+    "version": "1.0.0",
+    "scheme": "footballkidsquiz",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#eef5ff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "icon": "./assets/icon.png",
+      "deploymentTarget": "16.4",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.serhatonal.footballkidsquiz",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "blockedPermissions": [
+        "android.permission.INTERNET"
+      ]
+    },
+    "plugins": [
+      "expo-localization"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "d4c588e1-6779-4f3a-97f0-f91cedc64cd8"
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "cli": {
+    "version": ">= 14.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "distribution": "store",
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6799511277",
+        "appleTeamId": "UL2V6DD422",
+        "appleId": "serhaton@gmail.com",
+        "ascApiKeyPath": "./AuthKey_CAGND79FST.p8",
+        "ascApiKeyId": "CAGND79FST",
+        "ascApiKeyIssuerId": "2da147f9-eed9-4302-b390-f3500879d410"
+      }
+    }
+  }
+}

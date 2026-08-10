@@ -1,0 +1,32 @@
+{
+  "name": "football-kids-quiz",
+  "private": true,
+  "version": "1.0.0",
+  "main": "expo/AppEntry",
+  "scripts": {
+    "start": "expo start",
+    "start:tunnel": "expo start --dev-client --tunnel",
+    "ios": "expo run:ios",
+    "ios:device": "expo run:ios --device",
+    "android": "expo run:android",
+    "web": "expo start --web",
+    "postinstall": "node scripts/fix-expo-modules-jsi-swift.js"
+  },
+  "dependencies": {
+    "expo": "57.0.11",
+    "expo-localization": "~57.0.1",
+    "expo-speech": "57.0.1",
+    "expo-status-bar": "57.0.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.2",
+    "react-native-web": "0.21.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0",
+    "eas-cli": "^21.7.0"
+  },
+  "overrides": {
+    "react-dom": "19.2.3"
+  }
+}
