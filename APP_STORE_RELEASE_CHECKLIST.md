@@ -24,6 +24,7 @@
 
 ```bash
 npm install
+npm run start
 npx eas login
 npx eas build --platform ios --profile production
 npx eas submit --platform ios --profile production
