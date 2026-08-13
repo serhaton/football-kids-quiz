@@ -4,6 +4,7 @@
     "slug": "football-kids-quiz",
     "version": "1.0.0",
     "scheme": "footballkidsquiz",
+    "newArchEnabled": false,
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,16 +21,22 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.serhatonal.footballkidsquiz",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "GADApplicationIdentifier": "ca-app-pub-3940256099942544~1458002511",
+        "NSUserTrackingUsageDescription": "Bu tanımlayıcı daha uygun reklamlar gösterebilmek için kullanılacaktır."
       }
     },
-    "android": {
-      "blockedPermissions": [
-        "android.permission.INTERNET"
-      ]
-    },
+    "android": {},
     "plugins": [
-      "expo-localization"
+      "expo-localization",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "userTrackingUsageDescription": "Bu tanımlayıcı daha uygun reklamlar gösterebilmek için kullanılacaktır."
+        }
+      ]
     ],
     "extra": {
       "eas": {

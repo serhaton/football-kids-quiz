@@ -1,5 +1,6 @@
 {
   "expo.jsEngine": "hermes",
+  "newArchEnabled": "false",
   "ios.deploymentTarget": "18.6",
   "EX_DEV_CLIENT_NETWORK_INSPECTOR": "true",
   "expo.inlineModules.watchedDirectories": "[]",

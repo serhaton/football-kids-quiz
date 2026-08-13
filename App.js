@@ -13,6 +13,13 @@ import {
 import { StatusBar } from "expo-status-bar";
 import * as Speech from "expo-speech";
 import * as Localization from "expo-localization";
+import mobileAds, {
+  AdEventType,
+  BannerAd,
+  BannerAdSize,
+  InterstitialAd,
+  TestIds
+} from "react-native-google-mobile-ads";
 
 const PLAYERS = [
   { id: "messi", name: "Lionel Messi", image: require("./assets/players/messi.png") },
@@ -43,6 +50,8 @@ const PLAYERS = [
 ];
 
 const TOTAL_ROUNDS = 10;
+const BANNER_AD_UNIT_ID = TestIds.ADAPTIVE_BANNER;
+const INTERSTITIAL_AD_UNIT_ID = TestIds.INTERSTITIAL;
 
 const TRANSLATIONS = {
   en: {
@@ -139,7 +148,17 @@ export default function App() {
   const { width, height } = useWindowDimensions();
   const isSmallScreen = height < 760;
   const isLargeTablet = width >= 1000;
+  const isPhone = width < 768;
+  const isCompactWithBanner = isPhone && height < 830;
+  const showDetachedNextButton = isPhone;
   const nextQuestionTimerRef = useRef(null);
+  const pendingFinishRef = useRef(false);
+  const interstitialLoadedRef = useRef(false);
+  const interstitialRef = useRef(
+    InterstitialAd.createForAdRequest(INTERSTITIAL_AD_UNIT_ID, {
+      requestNonPersonalizedAdsOnly: true
+    })
+  );
   const deviceLanguage = getDeviceLanguage();
   const [questions, setQuestions] = useState(() => makeGameQuestions());
   const [round, setRound] = useState(1);
@@ -166,7 +185,18 @@ export default function App() {
   const next = () => {
     if (isTransitioning || !selectedId || !gameStarted) return;
     if (round >= TOTAL_ROUNDS) {
-      setFinished(true);
+      if (interstitialLoadedRef.current) {
+        pendingFinishRef.current = true;
+        try {
+          interstitialRef.current.show();
+        } catch {
+          pendingFinishRef.current = false;
+          setFinished(true);
+        }
+      } else {
+        interstitialRef.current.load();
+        setFinished(true);
+      }
       return;
     }
     setIsTransitioning(true);
@@ -263,6 +293,53 @@ export default function App() {
     }
   }, []);
 
+  useEffect(() => {
+    mobileAds()
+      .initialize()
+      .catch(() => null);
+
+    const interstitial = interstitialRef.current;
+
+    const unsubscribeLoaded = interstitial.addAdEventListener(AdEventType.LOADED, () => {
+      interstitialLoadedRef.current = true;
+    });
+
+    const finishAfterAd = () => {
+      if (!pendingFinishRef.current) return;
+      pendingFinishRef.current = false;
+      setFinished(true);
+    };
+
+    const unsubscribeClosed = interstitial.addAdEventListener(AdEventType.CLOSED, () => {
+      interstitialLoadedRef.current = false;
+      interstitial.load();
+      finishAfterAd();
+    });
+
+    const unsubscribeError = interstitial.addAdEventListener(AdEventType.ERROR, () => {
+      interstitialLoadedRef.current = false;
+      finishAfterAd();
+    });
+
+    interstitial.load();
+
+    return () => {
+      unsubscribeLoaded();
+      unsubscribeClosed();
+      unsubscribeError();
+    };
+  }, []);
+
+  const renderBottomBanner = () => (
+    <View style={styles.bannerContainer}>
+      <BannerAd
+        unitId={BANNER_AD_UNIT_ID}
+        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+      />
+    </View>
+  );
+
   if (finished) {
     const finalSubtitle =
       score === TOTAL_ROUNDS
@@ -286,6 +363,7 @@ export default function App() {
             <Text style={styles.secondaryButtonText}>{t.exit}</Text>
           </Pressable>
         </View>
+        {renderBottomBanner()}
         {settingsModal}
       </SafeAreaView>
     );
@@ -326,6 +404,7 @@ export default function App() {
             <Text style={styles.loadingSubtitle}>{t.loadingSubtitle} ⚽</Text>
           </View>
         </View>
+        {renderBottomBanner()}
         {settingsModal}
       </SafeAreaView>
     );
@@ -334,7 +413,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
-      <View style={styles.app}>
+      <View style={[styles.app, isCompactWithBanner && styles.appCompactWithBanner]}>
         <View style={styles.topBar}>
           <Text style={styles.logo}>⚽ {t.title}</Text>
           <View style={styles.topBarRight}>
@@ -355,25 +434,27 @@ export default function App() {
         </View>
 
         <View style={styles.actionRow}>
-          <Pressable style={styles.actionButton} onPress={restartGame}>
-            <Text style={styles.actionButtonText}>🔄 {t.restart}</Text>
+          <Pressable style={[styles.actionButton, isCompactWithBanner && styles.actionButtonCompact]} onPress={restartGame}>
+            <Text style={[styles.actionButtonText, isCompactWithBanner && styles.actionButtonTextCompact]}>🔄 {t.restart}</Text>
           </Pressable>
-          <Pressable style={styles.actionButton} onPress={exitGame}>
-            <Text style={styles.actionButtonText}>⏹ {t.exit}</Text>
+          <Pressable style={[styles.actionButton, isCompactWithBanner && styles.actionButtonCompact]} onPress={exitGame}>
+            <Text style={[styles.actionButtonText, isCompactWithBanner && styles.actionButtonTextCompact]}>⏹ {t.exit}</Text>
           </Pressable>
         </View>
 
         <View style={[
           styles.card,
           isSmallScreen && styles.cardSmall,
-          isLargeTablet && styles.cardTablet
+          isLargeTablet && styles.cardTablet,
+          isCompactWithBanner && styles.cardCompact
         ]}>
-          <Text style={styles.question}>{t.question} 🤔</Text>
+          <Text style={[styles.question, isCompactWithBanner && styles.questionCompact]}>{t.question} 🤔</Text>
 
           <View style={[
             styles.photoFrame,
             isSmallScreen && styles.photoFrameSmall,
-            isLargeTablet && styles.photoFrameTablet
+            isLargeTablet && styles.photoFrameTablet,
+            isCompactWithBanner && styles.photoFrameCompact
           ]}>
             <Image
               source={question.correct.image}
@@ -382,30 +463,31 @@ export default function App() {
             />
           </View>
 
-          <View style={[styles.optionsGrid, isLargeTablet && styles.optionsGridTablet]}>
+          <View style={[styles.optionsGrid, isLargeTablet && styles.optionsGridTablet, isCompactWithBanner && styles.optionsGridCompact]}>
             {question.options.map((player) => {
               const isCorrect = selectedId && player.id === question.correct.id;
               const isWrong = selectedId === player.id && player.id !== question.correct.id;
 
               return (
-                <View key={player.id} style={[styles.optionRow, isLargeTablet && styles.optionRowTablet]}>
+                <View key={player.id} style={[styles.optionRow, isLargeTablet && styles.optionRowTablet, isCompactWithBanner && styles.optionRowCompact]}>
                   <Pressable
                     onPress={() => choose(player)}
                     style={[
                       styles.answerButton,
                       isLargeTablet && styles.answerButtonTablet,
+                      isCompactWithBanner && styles.answerButtonCompact,
                       isCorrect && styles.correctAnswer,
                       isWrong && styles.wrongAnswer
                     ]}
                   >
-                    <Text style={styles.answerText}>{player.name}</Text>
+                    <Text style={[styles.answerText, isCompactWithBanner && styles.answerTextCompact]}>{player.name}</Text>
                   </Pressable>
                   <Pressable
                     onPress={() => speak(player.name, currentLanguage)}
-                    style={[styles.speakButton, isLargeTablet && styles.speakButtonTablet]}
+                    style={[styles.speakButton, isLargeTablet && styles.speakButtonTablet, isCompactWithBanner && styles.speakButtonCompact]}
                     accessibilityLabel={`${player.name} seslendir`}
                   >
-                    <Text style={styles.speakText}>🔊</Text>
+                    <Text style={[styles.speakText, isCompactWithBanner && styles.speakTextCompact]}>🔊</Text>
                   </Pressable>
                 </View>
               );
@@ -417,23 +499,33 @@ export default function App() {
               styles.feedback,
               selectedId === question.correct.id ? styles.feedbackGood : styles.feedbackTry
             ]}>
-              <Text style={styles.feedbackText}>
+              <Text style={[styles.feedbackText, isCompactWithBanner && styles.feedbackTextCompact]}>
                 {selectedId === question.correct.id ? `🎉 ${t.bravo}` : `💪 ${t.tryAgain}`}
               </Text>
             </View>
           )}
 
-          {selectedId && (
-            <Pressable style={styles.nextButton} onPress={next}>
-              <Text style={styles.nextButtonText}>
+          {selectedId && !showDetachedNextButton && (
+            <Pressable style={[styles.nextButton, isCompactWithBanner && styles.nextButtonCompact]} onPress={next}>
+              <Text style={[styles.nextButtonText, isCompactWithBanner && styles.nextButtonTextCompact]}>
                 {round === TOTAL_ROUNDS ? `${t.showResult} 🏆` : `${t.next} ⚽`}
               </Text>
             </Pressable>
           )}
         </View>
 
-        <Text style={[styles.hint, isLargeTablet && styles.hintTablet]}>🔊 {t.hint}</Text>
+        <Text style={[styles.hint, isLargeTablet && styles.hintTablet, isCompactWithBanner && styles.hintCompact]}>🔊 {t.hint}</Text>
       </View>
+      {selectedId && showDetachedNextButton && (
+        <View style={styles.detachedNextContainer}>
+          <Pressable style={[styles.nextButton, styles.detachedNextButton]} onPress={next}>
+            <Text style={styles.nextButtonText}>
+              {round === TOTAL_ROUNDS ? `${t.showResult} 🏆` : `${t.next} ⚽`}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+      {renderBottomBanner()}
       {settingsModal}
     </SafeAreaView>
   );
@@ -448,6 +540,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 12,
     paddingTop: 8,
+    paddingBottom: 8
+  },
+  appCompactWithBanner: {
     paddingBottom: 8
   },
   introScreen: {
@@ -562,6 +657,13 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     color: "#355172"
   },
+  actionButtonCompact: {
+    paddingVertical: 8,
+    borderRadius: 10
+  },
+  actionButtonTextCompact: {
+    fontSize: 13
+  },
   card: {
     flex: 1,
     backgroundColor: "rgba(255,255,255,0.95)",
@@ -570,6 +672,10 @@ const styles = StyleSheet.create({
   },
   cardSmall: {
     padding: 10
+  },
+  cardCompact: {
+    padding: 10,
+    borderRadius: 20
   },
   cardTablet: {
     flex: 0,
@@ -584,6 +690,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: "#10213d"
   },
+  questionCompact: {
+    fontSize: 23,
+    marginBottom: 6
+  },
   photoFrame: {
     width: "74%",
     maxWidth: 360,
@@ -596,6 +706,11 @@ const styles = StyleSheet.create({
   },
   photoFrameSmall: {
     width: "68%"
+  },
+  photoFrameCompact: {
+    width: "58%",
+    maxWidth: 290,
+    marginBottom: 6
   },
   photoFrameTablet: {
     width: "58%",
@@ -616,11 +731,18 @@ const styles = StyleSheet.create({
   optionsGridTablet: {
     rowGap: 6
   },
+  optionsGridCompact: {
+    rowGap: 6
+  },
   optionRow: {
     width: "49%",
     flexDirection: "row",
     gap: 6,
     minHeight: 52
+  },
+  optionRowCompact: {
+    minHeight: 44,
+    gap: 4
   },
   optionRowTablet: {
     minHeight: 48
@@ -637,11 +759,19 @@ const styles = StyleSheet.create({
   answerButtonTablet: {
     paddingVertical: 6
   },
+  answerButtonCompact: {
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 6
+  },
   answerText: {
     fontSize: 15,
     fontWeight: "900",
     color: "#10213d",
     textAlign: "center"
+  },
+  answerTextCompact: {
+    fontSize: 13
   },
   speakButton: {
     width: 44,
@@ -653,8 +783,15 @@ const styles = StyleSheet.create({
   speakButtonTablet: {
     width: 40
   },
+  speakButtonCompact: {
+    width: 34,
+    borderRadius: 10
+  },
   speakText: {
     fontSize: 20
+  },
+  speakTextCompact: {
+    fontSize: 16
   },
   correctAnswer: {
     backgroundColor: "#c9f8d4"
@@ -673,6 +810,9 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     color: "#10213d"
   },
+  feedbackTextCompact: {
+    fontSize: 17
+  },
   feedbackGood: {
     backgroundColor: "#c9f8d4"
   },
@@ -687,16 +827,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 10
   },
+  nextButtonCompact: {
+    marginTop: 6,
+    borderRadius: 10,
+    paddingVertical: 8
+  },
   nextButtonText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "900"
+  },
+  nextButtonTextCompact: {
+    fontSize: 16
+  },
+  detachedNextContainer: {
+    paddingHorizontal: 12,
+    paddingTop: 4,
+    paddingBottom: 4
+  },
+  detachedNextButton: {
+    marginTop: 0
   },
   hint: {
     marginTop: 8,
     textAlign: "center",
     color: "#637d99",
     fontWeight: "700"
+  },
+  hintCompact: {
+    marginTop: 6,
+    fontSize: 12
   },
   hintTablet: {
     marginTop: 12,
@@ -842,5 +1002,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 17,
     fontWeight: "900"
+  },
+  bannerContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 56,
+    paddingTop: 6,
+    paddingBottom: 2
   }
 });
