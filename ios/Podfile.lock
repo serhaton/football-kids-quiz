@@ -1,7 +1,7 @@
 PODS:
-  - EXConstants (57.0.9):
+  - EXConstants (57.0.10):
     - ExpoModulesCore
-  - Expo (57.0.11):
+  - Expo (57.0.12):
     - ExpoModulesCore
     - ExpoModulesJSI
     - hermes-engine
@@ -27,7 +27,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - ExpoAsset (57.0.9):
+  - ExpoAsset (57.0.10):
     - ExpoModulesCore
   - ExpoDomWebView (57.0.1):
     - ExpoModulesCore
@@ -2170,9 +2170,9 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  EXConstants: 05451cfe61c84dd2d840831d05bb0c115f96ec6a
-  Expo: da739a9dc8d16ac61adf80ae40f46e24a02957df
-  ExpoAsset: cfe3aa47b38c5bc793613f2d7224f2314ad132d0
+  EXConstants: 7afce64f3083a0b506763e41e3e38718497ed230
+  Expo: 423915c60a05e620e67a1f1bfcb612a217fd6f1b
+  ExpoAsset: 64e4684e2cb6c45a52009f91e18c45ff56ed4a09
   ExpoDomWebView: beaec034e51bd028428b98bb1f2633ab79c6d095
   ExpoFileSystem: 1dbd58528f91271baf87da7d8d67bffc8f863f7f
   ExpoFont: 59e1faf66ba9bcd232ae1e2ce58d202a48b6f65e
@@ -2184,7 +2184,7 @@ SPEC CHECKSUMS:
   ExpoModulesWorklets: 53d4ca8d32225cb3ec4660b9f03496192b4f3cac
   ExpoSpeech: 0e90904e2af5d6f166d4d2ffbdab535686597938
   FBLazyVector: 3c3be9a019176b5699455f7f66c5444b78a411c6
-  hermes-engine: 8737d70e63bbb2bd88fa2f9f0ef818663e43e072
+  hermes-engine: d35ba09fa7c83ff0525a3275dd8691220e81c16e
   RCTDeprecation: bccb6545c26db881ecddfd83a3f9ea82aba1605f
   RCTRequired: b2f74764d596fc0051f00fee94b49bf41a6f7f5a
   RCTSwiftUI: c6d6a31b849b9dfa64c33b55dc91ac15dd55774c

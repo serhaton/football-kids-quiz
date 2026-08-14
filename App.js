@@ -7,12 +7,15 @@ import {
   Image,
   ActivityIndicator,
   Modal,
+  ScrollView,
+  Linking,
   StyleSheet,
   useWindowDimensions
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import * as Speech from "expo-speech";
 import * as Localization from "expo-localization";
+import playerImageSources from "./docs/player_image_sources.json";
 
 const PLAYERS = [
   { id: "messi", name: "Lionel Messi", image: require("./assets/players/messi.png") },
@@ -37,12 +40,22 @@ const PLAYERS = [
   { id: "musiala", name: "Jamal Musiala", image: require("./assets/players/musiala.png") },
   { id: "calhanoglu", name: "Hakan Çalhanoğlu", image: require("./assets/players/calhanoglu.png") },
   { id: "ardaguler", name: "Arda Güler", image: require("./assets/players/ardaguler.png") },
-  { id: "kenanyildiz", name: "Kenan Yıldız", image: require("./assets/players/kenanyildiz.png") },
+  { id: "ilkaygundogan", name: "İlkay Gündoğan", image: require("./assets/players/ilkaygundogan.png") },
   { id: "orkunkokcu", name: "Orkun Kökçü", image: require("./assets/players/orkunkokcu.png") },
   { id: "merihdemiral", name: "Merih Demiral", image: require("./assets/players/merihdemiral.png") }
 ];
 
 const TOTAL_ROUNDS = 10;
+
+const IMAGE_CREDIT_ROWS = (playerImageSources?.rows || [])
+  .filter((row) => row.status === "ok")
+  .map((row) => ({
+    player: row.player,
+    author: row.author,
+    license: row.licenseShortName,
+    licenseUrl: row.licenseUrl,
+    sourceUrl: row.commonsFilePageUrl
+  }));
 
 const TRANSLATIONS = {
   en: {
@@ -68,6 +81,13 @@ const TRANSLATIONS = {
     english: "English",
     turkish: "Turkish",
     close: "Close",
+    imageCredits: "Image Credits",
+    creditsSubtitle: "Photo source and license details",
+    source: "Source",
+    author: "Author",
+    license: "License",
+    openSource: "Open Source",
+    openLicense: "Open License",
     finalTitle: "Awesome!",
     playAgain: "Play Again",
     finalPerfect: "Perfect! You guessed all football players!",
@@ -97,6 +117,13 @@ const TRANSLATIONS = {
     english: "İngilizce",
     turkish: "Türkçe",
     close: "Kapat",
+    imageCredits: "Görsel Kaynakları",
+    creditsSubtitle: "Fotoğraf kaynak ve lisans bilgileri",
+    source: "Kaynak",
+    author: "Yazar",
+    license: "Lisans",
+    openSource: "Kaynağı Aç",
+    openLicense: "Lisansı Aç",
     finalTitle: "Harika!",
     playAgain: "Tekrar Oyna",
     finalPerfect: "Mükemmel! Bütün futbolcuları bildin!",
@@ -150,6 +177,7 @@ export default function App() {
   const [gameStarted, setGameStarted] = useState(false);
   const [languagePreference, setLanguagePreference] = useState("system");
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [creditsVisible, setCreditsVisible] = useState(false);
 
   const currentLanguage = languagePreference === "system" ? deviceLanguage : languagePreference;
   const t = TRANSLATIONS[currentLanguage];
@@ -205,6 +233,15 @@ export default function App() {
     setGameStarted(false);
   };
 
+  const openExternalLink = async (url) => {
+    if (!url) return;
+    try {
+      await Linking.openURL(url);
+    } catch {
+      // Ignore errors silently to keep children focused on gameplay.
+    }
+  };
+
   const settingsModal = (
     <Modal
       visible={settingsVisible}
@@ -249,7 +286,59 @@ export default function App() {
             <Text style={styles.languageOptionText}>{t.turkish}</Text>
           </Pressable>
 
+          <Pressable
+            style={styles.creditsButton}
+            onPress={() => {
+              setSettingsVisible(false);
+              setCreditsVisible(true);
+            }}
+          >
+            <Text style={styles.creditsButtonText}>{t.imageCredits}</Text>
+          </Pressable>
+
           <Pressable style={styles.closeButton} onPress={() => setSettingsVisible(false)}>
+            <Text style={styles.closeButtonText}>{t.close}</Text>
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const creditsModal = (
+    <Modal
+      visible={creditsVisible}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setCreditsVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.creditsModalCard}>
+          <Text style={styles.modalTitle}>{t.imageCredits}</Text>
+          <Text style={styles.creditsSubtitle}>{t.creditsSubtitle}</Text>
+
+          <ScrollView style={styles.creditsList} contentContainerStyle={styles.creditsListContent}>
+            {IMAGE_CREDIT_ROWS.map((item) => (
+              <View key={item.player} style={styles.creditItem}>
+                <Text style={styles.creditPlayer}>{item.player}</Text>
+                <Text style={styles.creditMeta}>{t.author}: {item.author || "-"}</Text>
+                <Text style={styles.creditMeta}>{t.license}: {item.license || "-"}</Text>
+
+                <View style={styles.creditActionsRow}>
+                  <Pressable style={styles.creditLinkButton} onPress={() => openExternalLink(item.sourceUrl)}>
+                    <Text style={styles.creditLinkText}>{t.openSource}</Text>
+                  </Pressable>
+
+                  {item.licenseUrl ? (
+                    <Pressable style={styles.creditLinkButton} onPress={() => openExternalLink(item.licenseUrl)}>
+                      <Text style={styles.creditLinkText}>{t.openLicense}</Text>
+                    </Pressable>
+                  ) : null}
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+
+          <Pressable style={styles.closeButton} onPress={() => setCreditsVisible(false)}>
             <Text style={styles.closeButtonText}>{t.close}</Text>
           </Pressable>
         </View>
@@ -287,6 +376,7 @@ export default function App() {
           </Pressable>
         </View>
         {settingsModal}
+        {creditsModal}
       </SafeAreaView>
     );
   }
@@ -311,6 +401,7 @@ export default function App() {
           </View>
         </View>
         {settingsModal}
+        {creditsModal}
       </SafeAreaView>
     );
   }
@@ -327,6 +418,7 @@ export default function App() {
           </View>
         </View>
         {settingsModal}
+        {creditsModal}
       </SafeAreaView>
     );
   }
@@ -435,6 +527,7 @@ export default function App() {
         <Text style={[styles.hint, isLargeTablet && styles.hintTablet]}>🔊 {t.hint}</Text>
       </View>
       {settingsModal}
+      {creditsModal}
     </SafeAreaView>
   );
 }
@@ -829,6 +922,76 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "800",
     color: "#10213d"
+  },
+  creditsButton: {
+    marginTop: 2,
+    marginBottom: 8,
+    borderRadius: 14,
+    paddingVertical: 11,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ebf3ff"
+  },
+  creditsButtonText: {
+    color: "#0b5cff",
+    fontSize: 16,
+    fontWeight: "900"
+  },
+  creditsModalCard: {
+    width: "100%",
+    maxWidth: 560,
+    maxHeight: "88%",
+    borderRadius: 24,
+    backgroundColor: "#ffffff",
+    padding: 18
+  },
+  creditsSubtitle: {
+    marginTop: 6,
+    marginBottom: 10,
+    color: "#5b718c",
+    fontWeight: "700"
+  },
+  creditsList: {
+    maxHeight: 480
+  },
+  creditsListContent: {
+    paddingBottom: 6
+  },
+  creditItem: {
+    borderWidth: 1,
+    borderColor: "#dce7f6",
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    marginBottom: 8,
+    backgroundColor: "#f9fbff"
+  },
+  creditPlayer: {
+    fontSize: 16,
+    fontWeight: "900",
+    color: "#10213d",
+    marginBottom: 4
+  },
+  creditMeta: {
+    fontSize: 13,
+    color: "#355172",
+    marginBottom: 2
+  },
+  creditActionsRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8
+  },
+  creditLinkButton: {
+    backgroundColor: "#e9f0ff",
+    borderRadius: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 10
+  },
+  creditLinkText: {
+    color: "#0b5cff",
+    fontWeight: "800",
+    fontSize: 13
   },
   closeButton: {
     marginTop: 4,

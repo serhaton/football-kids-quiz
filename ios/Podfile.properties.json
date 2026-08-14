@@ -1,7 +1,7 @@
 {
   "expo.jsEngine": "hermes",
-  "ios.deploymentTarget": "18.6",
   "EX_DEV_CLIENT_NETWORK_INSPECTOR": "true",
+  "ios.deploymentTarget": "16.4",
   "expo.inlineModules.watchedDirectories": "[]",
   "expo.inlineModules.xcodeProjectTargets": "{\"mainTarget\":\"FutbolKidsQuiz\",\"targets\":[]}"
 }
