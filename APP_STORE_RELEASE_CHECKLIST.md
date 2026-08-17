@@ -1,4 +1,4 @@
-# App Store Release Checklist (Futbol Kids Quiz)
+# App Store Release Checklist (Football Kids Quiz)
 
 ## 1) Apple ve App Store Connect
 
