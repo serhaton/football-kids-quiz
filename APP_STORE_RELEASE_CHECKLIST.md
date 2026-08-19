@@ -18,7 +18,18 @@
 
 - [ ] Kullanılan futbolcu görsellerinin lisans/hak kontrolü yapıldı
 - [ ] Çocuk uygulaması kurallarına göre veri toplama ve takip ayarları doğrulandı
+- [ ] Kids Category parental gate doğrulandı (uygulama dışına çıkıştan önce zorunlu)
 - [ ] Uygulama metinleri son kontrol (TR/EN)
+
+### Kids Category Reviewer Notu (Guideline 1.3)
+
+- Uygulama içindeki dış bağlantılar (Image Credits altındaki Source/License linkleri) parental gate arkasına alındı.
+- Parental gate iki adımlı ve zorunlu:
+	1) 2 saniye basılı tutma
+	2) Rastgele matematik sorusu çözme
+- Doğrulama tamamlanmadan dış bağlantı açılmaz.
+- Gate ayarlardan kapatılamaz (disable edilemez).
+- Kod referansı: `App.js` içinde `openExternalLink`, `parentalGateModal`, `completeParentalGate`.
 
 ## 4) Build ve Submit Komutları
 

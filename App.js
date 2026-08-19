@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Modal,
   ScrollView,
+  TextInput,
   Linking,
   StyleSheet,
   useWindowDimensions
@@ -83,6 +84,14 @@ const TRANSLATIONS = {
     close: "Close",
     imageCredits: "Image Credits",
     creditsSubtitle: "Photo source and license details",
+    parentalGateTitle: "Parents Only",
+    parentalGateStepOne: "Press and hold the button for 2 seconds.",
+    parentalGateStepTwo: "Then solve this to open an external link:",
+    parentalGateInputLabel: "Answer",
+    parentalGateHoldButton: "Press and Hold",
+    parentalGateContinue: "Continue",
+    parentalGateCancel: "Cancel",
+    parentalGateError: "Wrong answer. Please try again.",
     source: "Source",
     author: "Author",
     license: "License",
@@ -119,6 +128,14 @@ const TRANSLATIONS = {
     close: "Kapat",
     imageCredits: "Görsel Kaynakları",
     creditsSubtitle: "Fotoğraf kaynak ve lisans bilgileri",
+    parentalGateTitle: "Ebeveyn Onayı",
+    parentalGateStepOne: "Düğmeye 2 saniye basılı tutun.",
+    parentalGateStepTwo: "Sonra dış bağlantıyı açmak için bunu çözün:",
+    parentalGateInputLabel: "Cevap",
+    parentalGateHoldButton: "Basılı Tut",
+    parentalGateContinue: "Devam",
+    parentalGateCancel: "Vazgeç",
+    parentalGateError: "Yanlış cevap. Lütfen tekrar deneyin.",
     source: "Kaynak",
     author: "Yazar",
     license: "Lisans",
@@ -162,11 +179,19 @@ function speak(text, language) {
   Speech.speak(text, { language: voiceLanguage, rate: 0.78, pitch: 1.05 });
 }
 
+function makeParentalChallenge() {
+  const a = Math.floor(Math.random() * 6) + 7;
+  const b = Math.floor(Math.random() * 6) + 4;
+  const c = Math.floor(Math.random() * 8) + 2;
+  return { a, b, c, answer: a * b + c };
+}
+
 export default function App() {
   const { width, height } = useWindowDimensions();
   const isSmallScreen = height < 760;
   const isLargeTablet = width >= 1000;
   const nextQuestionTimerRef = useRef(null);
+  const parentGateOpenTimerRef = useRef(null);
   const deviceLanguage = getDeviceLanguage();
   const [questions, setQuestions] = useState(() => makeGameQuestions());
   const [round, setRound] = useState(1);
@@ -178,6 +203,12 @@ export default function App() {
   const [languagePreference, setLanguagePreference] = useState("system");
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [creditsVisible, setCreditsVisible] = useState(false);
+  const [parentGateVisible, setParentGateVisible] = useState(false);
+  const [parentGateStep, setParentGateStep] = useState("hold");
+  const [parentGateInput, setParentGateInput] = useState("");
+  const [parentGateError, setParentGateError] = useState(false);
+  const [parentGateChallenge, setParentGateChallenge] = useState(() => makeParentalChallenge());
+  const [pendingExternalUrl, setPendingExternalUrl] = useState(null);
 
   const currentLanguage = languagePreference === "system" ? deviceLanguage : languagePreference;
   const t = TRANSLATIONS[currentLanguage];
@@ -233,13 +264,52 @@ export default function App() {
     setGameStarted(false);
   };
 
-  const openExternalLink = async (url) => {
+  const resetParentalGate = () => {
+    if (parentGateOpenTimerRef.current) {
+      clearTimeout(parentGateOpenTimerRef.current);
+      parentGateOpenTimerRef.current = null;
+    }
+    setParentGateVisible(false);
+    setParentGateStep("hold");
+    setParentGateInput("");
+    setParentGateError(false);
+    setParentGateChallenge(makeParentalChallenge());
+    setPendingExternalUrl(null);
+  };
+
+  const completeParentalGate = async () => {
+    const url = pendingExternalUrl;
+    resetParentalGate();
     if (!url) return;
     try {
       await Linking.openURL(url);
     } catch {
       // Ignore errors silently to keep children focused on gameplay.
     }
+  };
+
+  const openExternalLink = (url) => {
+    if (!url) return;
+
+    // Avoid stacking RN modals on iOS, which can lock touches.
+    setSettingsVisible(false);
+    setCreditsVisible(false);
+    setParentGateVisible(false);
+
+    setParentGateChallenge(makeParentalChallenge());
+    setParentGateInput("");
+    setParentGateError(false);
+    setParentGateStep("hold");
+    setPendingExternalUrl(url);
+
+    if (parentGateOpenTimerRef.current) {
+      clearTimeout(parentGateOpenTimerRef.current);
+    }
+
+    parentGateOpenTimerRef.current = setTimeout(() => {
+      setParentGateVisible(true);
+      parentGateOpenTimerRef.current = null;
+    }, 140);
   };
 
   const settingsModal = (
@@ -346,9 +416,85 @@ export default function App() {
     </Modal>
   );
 
+  const parentalGateModal = (
+    <Modal
+      visible={parentGateVisible}
+      transparent
+      animationType="fade"
+      onRequestClose={resetParentalGate}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.parentalGateCard}>
+          <Text style={styles.modalTitle}>{t.parentalGateTitle}</Text>
+          <Text style={styles.parentalGateText}>{t.parentalGateStepOne}</Text>
+
+          <Pressable
+            delayLongPress={2000}
+            onLongPress={() => setParentGateStep("question")}
+            style={[
+              styles.parentalGateHoldButton,
+              parentGateStep === "question" && styles.parentalGateHoldButtonDone
+            ]}
+          >
+            <Text style={styles.parentalGateHoldButtonText}>{t.parentalGateHoldButton}</Text>
+          </Pressable>
+
+          <Text style={styles.parentalGateText}>{t.parentalGateStepTwo}</Text>
+          <Text style={styles.parentalGateQuestion}>
+            {parentGateChallenge.a} × {parentGateChallenge.b} + {parentGateChallenge.c} = ?
+          </Text>
+
+          <TextInput
+            style={styles.parentalGateInput}
+            value={parentGateInput}
+            onChangeText={(text) => {
+              setParentGateInput(text.replace(/[^0-9]/g, ""));
+              if (parentGateError) setParentGateError(false);
+            }}
+            keyboardType="number-pad"
+            editable={parentGateStep === "question"}
+            placeholder={t.parentalGateInputLabel}
+            placeholderTextColor="#7f91a6"
+            maxLength={4}
+          />
+
+          {parentGateError ? <Text style={styles.parentalGateError}>{t.parentalGateError}</Text> : null}
+
+          <View style={styles.parentalGateActions}>
+            <Pressable style={styles.parentalGateCancelButton} onPress={resetParentalGate}>
+              <Text style={styles.parentalGateCancelButtonText}>{t.parentalGateCancel}</Text>
+            </Pressable>
+
+            <Pressable
+              style={[
+                styles.parentalGateContinueButton,
+                (parentGateStep !== "question" || parentGateInput.length === 0) && styles.parentalGateContinueButtonDisabled
+              ]}
+              disabled={parentGateStep !== "question" || parentGateInput.length === 0}
+              onPress={() => {
+                if (Number(parentGateInput) === parentGateChallenge.answer) {
+                  completeParentalGate();
+                  return;
+                }
+                setParentGateError(true);
+                setParentGateInput("");
+                setParentGateChallenge(makeParentalChallenge());
+              }}
+            >
+              <Text style={styles.parentalGateContinueButtonText}>{t.parentalGateContinue}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+
   useEffect(() => () => {
     if (nextQuestionTimerRef.current) {
       clearTimeout(nextQuestionTimerRef.current);
+    }
+    if (parentGateOpenTimerRef.current) {
+      clearTimeout(parentGateOpenTimerRef.current);
     }
   }, []);
 
@@ -377,6 +523,7 @@ export default function App() {
         </View>
         {settingsModal}
         {creditsModal}
+        {parentalGateModal}
       </SafeAreaView>
     );
   }
@@ -402,6 +549,7 @@ export default function App() {
         </View>
         {settingsModal}
         {creditsModal}
+        {parentalGateModal}
       </SafeAreaView>
     );
   }
@@ -419,6 +567,7 @@ export default function App() {
         </View>
         {settingsModal}
         {creditsModal}
+        {parentalGateModal}
       </SafeAreaView>
     );
   }
@@ -528,6 +677,7 @@ export default function App() {
       </View>
       {settingsModal}
       {creditsModal}
+      {parentalGateModal}
     </SafeAreaView>
   );
 }
@@ -1005,5 +1155,93 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 17,
     fontWeight: "900"
+  },
+  parentalGateCard: {
+    width: "100%",
+    maxWidth: 460,
+    borderRadius: 24,
+    backgroundColor: "#ffffff",
+    padding: 18
+  },
+  parentalGateText: {
+    marginTop: 10,
+    color: "#355172",
+    fontSize: 15,
+    fontWeight: "700"
+  },
+  parentalGateHoldButton: {
+    marginTop: 10,
+    borderRadius: 14,
+    backgroundColor: "#ecf3ff",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12
+  },
+  parentalGateHoldButtonDone: {
+    backgroundColor: "#c9f8d4"
+  },
+  parentalGateHoldButtonText: {
+    color: "#0b5cff",
+    fontSize: 16,
+    fontWeight: "900"
+  },
+  parentalGateQuestion: {
+    marginTop: 8,
+    fontSize: 24,
+    fontWeight: "900",
+    color: "#10213d"
+  },
+  parentalGateInput: {
+    marginTop: 10,
+    borderWidth: 2,
+    borderColor: "#dce7f6",
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    fontSize: 20,
+    color: "#10213d",
+    fontWeight: "900",
+    backgroundColor: "#f7fbff"
+  },
+  parentalGateError: {
+    marginTop: 8,
+    color: "#c73f3f",
+    fontWeight: "800"
+  },
+  parentalGateActions: {
+    marginTop: 14,
+    flexDirection: "row",
+    gap: 8
+  },
+  parentalGateCancelButton: {
+    flex: 1,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#dce7f6",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 11,
+    backgroundColor: "#ffffff"
+  },
+  parentalGateCancelButtonText: {
+    color: "#355172",
+    fontWeight: "900",
+    fontSize: 16
+  },
+  parentalGateContinueButton: {
+    flex: 1,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 11,
+    backgroundColor: "#0b5cff"
+  },
+  parentalGateContinueButtonDisabled: {
+    backgroundColor: "#9ebeff"
+  },
+  parentalGateContinueButtonText: {
+    color: "#ffffff",
+    fontWeight: "900",
+    fontSize: 16
   }
 });
