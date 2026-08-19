@@ -11,6 +11,8 @@ import {
   TextInput,
   Linking,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
   useWindowDimensions
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
@@ -423,13 +425,17 @@ export default function App() {
       animationType="fade"
       onRequestClose={resetParentalGate}
     >
-      <View style={styles.modalOverlay}>
+      <KeyboardAvoidingView
+        style={styles.modalOverlay}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 24 : 0}
+      >
         <View style={styles.parentalGateCard}>
           <Text style={styles.modalTitle}>{t.parentalGateTitle}</Text>
           <Text style={styles.parentalGateText}>{t.parentalGateStepOne}</Text>
 
           <Pressable
-            delayLongPress={2000}
+            delayLongPress={1400}
             onLongPress={() => setParentGateStep("question")}
             style={[
               styles.parentalGateHoldButton,
@@ -485,7 +491,7 @@ export default function App() {
             </Pressable>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 
