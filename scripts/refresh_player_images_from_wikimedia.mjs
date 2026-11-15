@@ -108,7 +108,7 @@ async function main() {
     const row = {
       id: player.id,
       player: player.name,
-      localFile: `assets/players/${player.id}.png`,
+      localFile: `assets/players/${player.id}.jpg`,
       wikiTitle: player.wikiTitle,
       wikipediaPageUrl: "",
       commonsFileName: "",
@@ -179,7 +179,8 @@ async function main() {
       row.licenseUrl = licenseUrl;
 
       const tmpIn = path.join(tmpDir, `${player.id}.img`);
-      const outPng = path.join(playersDir, `${player.id}.png`);
+      const outImage = path.join(playersDir, `${player.id}.jpg`);
+      const outThumb = path.join(playersDir, "thumbs", `${player.id}.jpg`);
 
       const imgRes = await fetchWithRetry(downloadUrl);
       if (!imgRes.ok) {
@@ -188,13 +189,22 @@ async function main() {
       const ab = await imgRes.arrayBuffer();
       await fs.writeFile(tmpIn, Buffer.from(ab));
 
-      const sips = spawnSync("sips", ["-s", "format", "png", tmpIn, "--out", outPng], {
-        cwd: projectRoot,
-        stdio: "pipe",
-        encoding: "utf8"
-      });
-      if (sips.status !== 0) {
-        throw new Error(`sips failed: ${sips.stderr || sips.stdout}`);
+      // Every photo is cropped to 3:4 (keeping the upper part, where the face usually is)
+      // so the game can show them edge to edge. Check the result by eye after a refresh.
+      const crop = "crop='min(iw,ih*3/4)':'min(ih,iw*4/3)':'(iw-ow)/2':'(ih-oh)*0.2'";
+      const outputs = [
+        [outImage, `${crop},scale=720:960`, "3"],
+        [outThumb, `${crop},scale=360:480`, "4"]
+      ];
+      for (const [outFile, filter, quality] of outputs) {
+        const ffmpeg = spawnSync(
+          "ffmpeg",
+          ["-loglevel", "error", "-y", "-i", tmpIn, "-vf", filter, "-q:v", quality, outFile],
+          { cwd: projectRoot, stdio: "pipe", encoding: "utf8" }
+        );
+        if (ffmpeg.status !== 0) {
+          throw new Error(`ffmpeg failed: ${ffmpeg.stderr || ffmpeg.stdout || ffmpeg.error}`);
+        }
       }
 
       await fs.unlink(tmpIn).catch(() => {});

@@ -2,13 +2,13 @@
   "expo": {
     "name": "Football Kids Quiz",
     "slug": "football-kids-quiz",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "scheme": "footballkidsquiz",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "backgroundColor": "#eef5ff"
+      "backgroundColor": "#1273E6"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -26,12 +26,22 @@
     "android": {
       "blockedPermissions": [
         "android.permission.INTERNET",
-        "android.permission.INTERNET"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
       ],
       "package": "com.serhatonal.footballkidsquiz"
     },
     "plugins": [
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      "expo-asset"
     ],
     "extra": {
       "eas": {
